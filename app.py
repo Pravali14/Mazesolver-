@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template
 import os
 import time
 import cv2
@@ -7,46 +7,13 @@ import networkx as nx
 
 app = Flask(__name__)
 
+# Define upload folder for the images
 UPLOAD_FOLDER = "static"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maze Solver</title>
-    <script>
-        function uploadImage() {
-            let formData = new FormData();
-            formData.append("maze_image", document.getElementById("maze").files[0]);
-
-            fetch("/solve", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById("result").innerHTML = 
-                        `<h3>Solved in ${data.time_taken} seconds</h3>
-                         <img src="${data.image_url}" style="max-width: 100%;">`;
-                } else {
-                    document.getElementById("result").innerHTML = "<h3>Error: " + data.error + "</h3>";
-                }
-            });
-        }
-    </script>
-</head>
-<body style="text-align: center; font-family: Arial, sans-serif;">
-    <h1>Maze Solver</h1>
-    <input type="file" id="maze">
-    <button onclick="uploadImage()">Solve Maze</button>
-    <div id="result"></div>
-</body>
-</html>
-"""
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 def process_maze(image_path):
     """Solve the maze and return solved image path and time taken."""
@@ -85,10 +52,6 @@ def process_maze(image_path):
     time_taken = round(time.time() - start_time, 2)
     return solved_path, time_taken
 
-@app.route('/')
-def index():
-    return render_template_string(HTML_TEMPLATE)
-
 @app.route('/solve', methods=['POST'])
 def solve():
     if 'maze_image' not in request.files:
@@ -108,4 +71,4 @@ def solve():
     return jsonify({"success": True, "image_url": "/static/solved_maze.png", "time_taken": time_taken})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
