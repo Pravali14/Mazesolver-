@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Solver</title>
+    <script>
+        function uploadImage() {
+            let formData = new FormData();
+            formData.append("maze_image", document.getElementById("maze").files[0]);
+
+            fetch("/solve", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("result").innerHTML = 
+                        `<h3>Solved in ${data.time_taken} seconds</h3>
+                         <img src="${data.image_url}" style="max-width: 100%;">`;
+                } else {
+                    document.getElementById("result").innerHTML = "<h3>Error: " + data.error + "</h3>";
+                }
+            });
+        }
+    </script>
+</head>
+<body style="text-align: center; font-family: Arial, sans-serif;">
+    <h1>Maze Solver</h1>
+    <input type="file" id="maze">
+    <button onclick="uploadImage()">Solve Maze</button>
+    <div id="result"></div>
+</body>
+</html>
